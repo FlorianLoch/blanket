@@ -147,6 +147,17 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 intro += covVar+"[f].branchData[l][c][1].push(r); }";
                 intro += "return r;};\n";
             }
+
+            //Tracing
+            intro += "if (typeof " + covVar + ".trace === 'undefined') {";
+            intro +=    covVar + ".trace = [];";
+            intro +=    covVar + "_tracer = function (file, line) {";
+            intro +=        covVar + ".trace.push({file: file, line: line});";
+            intro +=    "}"; 
+            intro += "}";
+            //
+            
+
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
 
             intro += covVar+"['"+filename+"']=[];\n";
@@ -226,7 +237,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                         return;
                     }
                     if (node.loc && node.loc.start){
-                        node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
+                        var insertion = covVar+"['"+filename+"']["+node.loc.start.line+"]++;";
+                        //Add tracing
+                        insertion += covVar + "_tracer('" + filename + "', " + node.loc.start.line + ");";
+                        //
+                        node.update(insertion + node.source());
                         _blanket._trackingArraySetup.push(node.loc.start.line);
                     }else{
                         //I don't think we can handle a node with no location
