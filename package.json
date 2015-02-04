@@ -52,7 +52,9 @@
     "blanket": {
       "pattern": "test",
       "data-cover-flags": {
-        "debug": false
+        "debug": false,
+        "embedSource": true,
+        "trace": false
       },
       "loader": "./node-loaders/coffee-script",
       "data-cover-reporter-options": {

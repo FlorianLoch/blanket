@@ -47,7 +47,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         testReadyCallback:null,
         commonJS:false,
         instrumentCache:false,
-        modulePattern: null
+        modulePattern: null,
+        embedSource: true,
+        trace: false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -149,22 +151,27 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }
 
             //Tracing
-            intro += "if (typeof " + covVar + ".trace === 'undefined') {";
-            intro +=    covVar + ".trace = [];";
-            intro +=    covVar + "_tracer = function (file, line) {";
-            intro +=        covVar + ".trace.push({file: file, line: line});";
-            intro +=    "}"; 
-            intro += "}";
+            if (_blanket.options("trace")) {
+                intro += "if (typeof " + covVar + ".trace === 'undefined') {";
+                intro +=    covVar + ".trace = [];";
+                intro +=    covVar + "_tracer = function (file, line) {";
+                intro +=        covVar + ".trace.push({file: file, line: line});";
+                intro +=    "}"; 
+                intro += "}";
+            }
             //
             
-
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
 
             intro += covVar+"['"+filename+"']=[];\n";
             if (branches){
                 intro += covVar+"['"+filename+"'].branchData=[];\n";
             }
-            intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
+
+            if (_blanket.options("embedSource")) {
+                intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
+            }
+
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
                 return parseInt(a,10) > parseInt(b,10);
@@ -239,7 +246,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     if (node.loc && node.loc.start){
                         var insertion = covVar+"['"+filename+"']["+node.loc.start.line+"]++;";
                         //Add tracing
-                        insertion += covVar + "_tracer('" + filename + "', " + node.loc.start.line + ");";
+                        if (_blanket.options("trace")) { 
+                            insertion += covVar + "_tracer('" + filename + "', " + node.loc.start.line + ");";
+                        }
                         //
                         node.update(insertion + node.source());
                         _blanket._trackingArraySetup.push(node.loc.start.line);

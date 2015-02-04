@@ -65,6 +65,8 @@ var blanketNode = function (userOptions,cli){
                 newOptions.branchTracking = !!optionValue.branchTracking;
                 newOptions.debug = !!optionValue.debug;
                 newOptions.engineOnly = !!optionValue.engineOnly;
+                newOptions.trace = !!optionValue.trace;
+                newOptions.embedSource = !!optionValue.embedSource;
             }
             if (option === "data-cover-reporter-options"){
                 newOptions.reporter_options = optionValue;
